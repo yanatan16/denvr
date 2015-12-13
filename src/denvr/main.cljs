@@ -1,11 +1,11 @@
-(ns denver.cli
+(ns denvr.main
   (:require [cljs.nodejs :as nodejs]
-            [denver.core :as denver]))
+            [denvr.cli :as cli]))
 
 (nodejs/enable-util-print!)
 
 (defn -main [& args]
-  (println "Running denver CLI")
-  (denver/run))
+  (println "Running denvr CLI")
+  (apply cli/cli args))
 
 (set! *main-cli-fn* -main)
