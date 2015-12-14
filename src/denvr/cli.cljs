@@ -1,5 +1,6 @@
 (ns denvr.cli
-  (:require [cljs.tools.cli :refer [parse-opts]]
+  (:require [cljs.nodejs :as nodejs]
+            [cljs.tools.cli :refer [parse-opts]]
             [clojure.string :as str]
             [denvr.core :refer [run]]))
 
@@ -34,14 +35,15 @@
    ["clone" "Clone an environment from a remote repository"
     [["-h" "--help"]]]])
 
-(def usage "Usage: denvr [top-options] subcmd [subcmd-options]")
+(defn usage [script]
+  (str "Usage: " script " [top-options] subcmd [subcmd-options]"))
 
 (def subcmd-cli-options-map
   (reduce #(assoc %1 (first %2) (last %2))
           {} subcmd-cli-options))
 
-(defn- top-help [top-summary error]
-  {:error (str usage
+(defn- top-help [script top-summary error]
+  {:error (str (usage script)
                (if (some? error) "\n" "")
                error
                "\nTop-level options:\n"
@@ -50,42 +52,42 @@
                (reduce #(str %1 "\n  " (first %2) ": " (second %2))
                        "" subcmd-cli-options))})
 
-(defn- subcmd-help [top-summary subcmd-summary error subcmd]
-  {:error (str usage
+(defn- subcmd-help [script top-summary subcmd-summary error subcmd]
+  {:error (str (usage script)
                (if (some? error) "\n" "")
                error
                "\nTop-level options:\n" top-summary
                "\nSubcommand " subcmd " options:\n"
                subcmd-summary)})
 
-(defn parse-subcmd-args [subcmd args top-summary top-options]
+(defn parse-subcmd-args [script subcmd args top-summary top-options]
   (let [[subcmd-docstr subcmd-spec] (subcmd-cli-options-map subcmd)
         {:keys [options summary errors arguments]}
         (parse-opts args subcmd-spec)]
     (cond
-      errors (subcmd-help top-summary summary (str/join "\n" errors) subcmd)
-      (:help options) (subcmd-help top-summary summary nil subcmd)
+      errors (subcmd-help script top-summary summary (str/join "\n" errors) subcmd)
+      (:help options) (subcmd-help script top-summary summary nil subcmd)
       :else {:parsed {:subcmd (keyword subcmd)
                       :top-options top-options
                       :options options
                       :arguments arguments}})))
 
-(defn parse-args [args]
+(defn parse-args [script args]
   (let [{:keys [options summary errors]
          [subcmd & subargs] :arguments}
         (parse-opts args top-level-spec :in-order true)]
     (cond
-      errors (top-help summary (str/join "\n" errors))
-      (:help options) (top-help summary nil)
-      (nil? subcmd) (top-help summary "No subcommand specified.")
+      errors (top-help script summary (str/join "\n" errors))
+      (:help options) (top-help script summary nil)
+      (nil? subcmd) (top-help script summary "No subcommand specified.")
       (nil? (subcmd-cli-options-map subcmd))
-        (top-help summary (str "Subcommand " subcmd " not recognized"))
-      :else (parse-subcmd-args subcmd subargs summary options)
+        (top-help script summary (str "Subcommand " subcmd " not recognized"))
+      :else (parse-subcmd-args script subcmd subargs summary options)
       )))
 
 
-(defn cli [args]
-  (let [{:keys [error parsed]} (parse-args args)]
+(defn cli [script args]
+  (let [{:keys [error parsed]} (parse-args script args)]
     (if error
       (println error)
       (run parsed))))

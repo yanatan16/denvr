@@ -8,10 +8,9 @@
 (nodejs/enable-util-print!)
 
 (defn -main []
-  (cli/cli
-   (let [[script & args] (js->clj (.-argv nodejs/process))]
-     (if (= (basename script) "node")
-       (rest args)
-       args))))
+  (let [[script & args] (js->clj (.-argv nodejs/process))]
+    (if (= (basename script) "node")
+      (cli/cli (str script " " (first args)) (rest args))
+      (cli/cli script args))))
 
 (set! *main-cli-fn* -main)

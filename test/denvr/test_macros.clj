@@ -6,7 +6,7 @@
     `(some? (re-find ~re ~s))))
 
 (defmacro is-parse-error [re args]
-  `(let [pargs# (denvr.cli/parse-args ~args)]
+  `(let [pargs# (denvr.cli/parse-args "denvr" ~args)]
      (cljs.test/is (string? (:error pargs#))
                    (str "No error found on parsing: " (pr-str ~args)))
      (cljs.test/is (nil? (:parsed pargs#))
@@ -17,7 +17,7 @@
                           (:error pargs#))))))
 
 (defmacro is-parsed [form args]
-  `(let [pargs# (denvr.cli/parse-args ~args)]
+  `(let [pargs# (denvr.cli/parse-args "denvr" ~args)]
      (cljs.test/is (nil? (:error pargs#))
                    (str "Error found in parsing: " (pr-str ~args)))
      (cljs.test/is (-> (:parsed pargs#) ~form)
