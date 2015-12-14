@@ -1,4 +1,4 @@
-(defproject denvr "0.1.0"
+(defproject denvr "0.1.1-SNAPSHOT"
   :description "Development Environment Reimagined.
                A CLI manager for managing and sharing
                development environment configurations."
@@ -31,7 +31,11 @@
                   ["vcs" "commit"]
                   ["vcs" "tag"]
                   ["build"]
-                  ["npm" "publish"]]
+                  ["npm" "publish"]
+                  ["change" "version"
+                   "leiningen.release/bump-version"]
+                  ["vcs" "commit"]
+                  ["vcs" "tag"]]
 
   :profiles {:dev {:dependencies [[lein-doo "0.1.6"]]}}
 
