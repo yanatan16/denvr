@@ -9,7 +9,7 @@ A CLI application for managing microservice, containerized development environme
 Install with
 
 ```sh
-npm install denvr
+npm install -g denvr
 ```
 
 Use with the now-installed binary:
