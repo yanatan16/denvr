@@ -1,4 +1,4 @@
-(defproject denvr "0.1.1-SNAPSHOT"
+(defproject denvr "0.1.1"
   :description "Development Environment Reimagined.
                A CLI manager for managing and sharing
                development environment configurations."
