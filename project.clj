@@ -1,4 +1,4 @@
-(defproject denvr "0.1.0-SNAPSHOT"
+(defproject denvr "0.1.0-SNAPSHOT-2"
   :description "Development Environment Reimagined.
                A CLI manager for managing and sharing
                development environment configurations."
@@ -8,6 +8,7 @@
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.170" :classifier "aot"]
+                 [io.nervous/cljs-nodejs-externs "0.2.0"]
 
                  [org.clojure/tools.cli "0.3.3"]]
 
@@ -17,11 +18,20 @@
             [org.bodil/lein-noderepl "0.1.11"]]
 
   :npm {:dependencies [["source-map-support" "0.4.0"]]
-        :package {:bin {"denvr" "build/main.js"}}}
+        :package {:bin {"denvr" "build/main.js"}
+                  :private false}}
 
   :aliases {"build" ["cljsbuild" "once" "main"]
             "test" ["doo" "node" "test-node" "once"]
             "test-auto" ["doo" "node" "test-node" "auto"]}
+
+  :release-tasks [["vcs" "assert-committed"]
+                  ["change" "version"
+                   "leiningen.release/bump-version" "release"]
+                  ["vcs" "commit"]
+                  ["vcs" "tag"]
+                  ["build"]
+                  ["npm" "publish"]]
 
   :profiles {:dev {:dependencies [[lein-doo "0.1.6"]]}}
 
@@ -30,7 +40,7 @@
                         :compiler {:main denvr.main
                                    :output-to "build/main.js"
                                    :output-dir "build/js"
-                                   :optimizations :none
+                                   :optimizations :advanced
                                    :target :nodejs
                                    :source-map "build/main.js.map"}}
                        {:id "test-node"

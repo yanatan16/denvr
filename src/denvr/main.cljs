@@ -3,13 +3,13 @@
             [denvr.cli :as cli]))
 
 (def path (nodejs/require "path"))
-(def basename #(.basename path %))
+(defn basename [s] (.basename path s))
 
 (nodejs/enable-util-print!)
 
 (defn -main []
   (cli/cli
-   (let [[script & args] (js->clj (.-argv js/process))]
+   (let [[script & args] (js->clj (.-argv nodejs/process))]
      (if (= (basename script) "node")
        (rest args)
        args))))
