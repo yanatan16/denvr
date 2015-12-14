@@ -23,7 +23,13 @@
 
   :aliases {"build" ["cljsbuild" "once" "main"]
             "test" ["doo" "node" "test-node" "once"]
-            "test-auto" ["doo" "node" "test-node" "auto"]}
+            "test-auto" ["doo" "node" "test-node" "auto"]
+            "snapshot" ["do"
+                        "vcs" "assert-committed,"
+                        "clean,"
+                        "build,"
+                        "vcs" "commit,"
+                        "vcs" "tag"]}
 
   :release-tasks [["vcs" "assert-committed"]
                   ["clean"]
