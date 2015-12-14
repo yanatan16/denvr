@@ -16,9 +16,9 @@
                      (str "Error check failed for error message: "
                           (:error pargs#))))))
 
-(defmacro is-parsed [f args]
+(defmacro is-parsed [form args]
   `(let [pargs# (denvr.cli/parse-args ~args)]
      (cljs.test/is (nil? (:error pargs#))
                    (str "Error found in parsing: " (pr-str ~args)))
-     (cljs.test/is (~f (:parsed pargs#))
+     (cljs.test/is (-> (:parsed pargs#) ~form)
                    (str "Failed check for parsed: " (pr-str (:parsed pargs#))))))

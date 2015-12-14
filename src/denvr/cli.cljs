@@ -84,7 +84,7 @@
       )))
 
 
-(defn cli [& args]
+(defn cli [args]
   (let [{:keys [error parsed]} (parse-args args)]
     (if error
       (println error)

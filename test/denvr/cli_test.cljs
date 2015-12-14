@@ -17,18 +17,18 @@
   (testing "bad subcommand"
     (is-parse-error #"Subcommand foo not recognized" ["foo"]))
   (testing "version subcommand"
-    (is-parsed #(= % version-parsed) ["version"]))
+    (is-parsed (= version-parsed) ["version"]))
   (testing "Configuration Directory option"
-    (is-parsed #(= % (assoc-in version-parsed [:top-options :configdir]
+    (is-parsed (= (assoc-in version-parsed [:top-options :configdir]
                                "/tmp/configdir"))
                ["-c" "/tmp/configdir" "version"])
-    (is-parsed #(= % (assoc-in version-parsed [:top-options :configdir]
+    (is-parsed (= (assoc-in version-parsed [:top-options :configdir]
                                "/tmp/configdir"))
                ["--configdir" "/tmp/configdir" "version"]))
   (testing "Verbosity option"
-    (is-parsed #(= % (assoc-in version-parsed [:top-options :verbosity] 1))
+    (is-parsed (= (assoc-in version-parsed [:top-options :verbosity] 1))
                ["-v" "version"])
-    (is-parsed #(= % (assoc-in version-parsed [:top-options :verbosity] 3))
+    (is-parsed (= (assoc-in version-parsed [:top-options :verbosity] 3))
                ["-v" "-v" "-v" "version"])
-    (is-parsed #(= % (assoc-in version-parsed [:top-options :verbosity] 3))
+    (is-parsed (= (assoc-in version-parsed [:top-options :verbosity] 3))
                ["-vvv" "version"])))

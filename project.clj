@@ -13,7 +13,8 @@
 
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-npm "0.6.1"]
-            [lein-doo "0.1.6"]]
+            [lein-doo "0.1.6"]
+            [org.bodil/lein-noderepl "0.1.11"]]
 
   :npm {:dependencies [["source-map-support" "0.4.0"]]
         :package {:bin {"denvr" "build/main.js"}}}
@@ -26,16 +27,17 @@
 
   :cljsbuild {:builds [{:id "main"
                         :source-paths ["src"]
-                        :compiler {:output-to "build/main.js"
+                        :compiler {:main denvr.main
+                                   :output-to "build/main.js"
                                    :output-dir "build/js"
-                                   :optimizations :advanced
+                                   :optimizations :none
                                    :target :nodejs
                                    :source-map "build/main.js.map"}}
                        {:id "test-node"
                         :source-paths ["src" "test"]
                         :compiler {:main runner
                                    :output-to     "target/test-node.js"
-                                   :target :nodejs ;;; this target required for node, plus a *main* defined in the tests.
+                                   :target :nodejs
                                    :output-dir    "target/test-js"
                                    :optimizations :none
                                    :pretty-print  true}}]})

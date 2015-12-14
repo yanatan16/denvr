@@ -14,3 +14,4 @@ doc
 build
 package.json
 .cljs_rhino_repl
+/.cljs_node_repl
