@@ -26,16 +26,17 @@
             "test-auto" ["doo" "node" "test-node" "auto"]}
 
   :release-tasks [["vcs" "assert-committed"]
+                  ["clean"]
+                  ["build"]
                   ["change" "version"
                    "leiningen.release/bump-version" "release"]
                   ["vcs" "commit"]
                   ["vcs" "tag"]
-                  ["build"]
                   ["npm" "publish"]
                   ["change" "version"
                    "leiningen.release/bump-version"]
                   ["vcs" "commit"]
-                  ["vcs" "tag"]]
+                  ["vcs" "push"]]
 
   :profiles {:dev {:dependencies [[lein-doo "0.1.6"]]}}
 
