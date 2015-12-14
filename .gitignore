@@ -10,8 +10,7 @@ pom.xml.asc
 .hgignore
 .hg/
 
-/build/test-node.js
-/build/test-js
+/build
 package.json
 /.cljs_rhino_repl
 /.cljs_node_repl
