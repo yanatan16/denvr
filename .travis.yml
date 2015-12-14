@@ -1,0 +1,5 @@
+language: clojure
+before_script:
+  - lein npm install
+script:
+  - lein test
