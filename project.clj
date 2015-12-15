@@ -8,14 +8,21 @@
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.170" :classifier "aot"]
+                 [org.clojure/core.async "0.2.374"]
+                 [org.clojure/tools.cli "0.3.3"]
+                 [org.clojure/algo.monads "0.1.5"]
+
                  [io.nervous/cljs-nodejs-externs "0.2.0"]
 
-                 [org.clojure/tools.cli "0.3.3"]]
+                 [prismatic/schema "1.0.4"]]
+
+
+  :profiles {:dev {:dependencies [[lein-doo "0.1.6"]
+                                  [org.clojure/test.check "0.9.0"]]}}
 
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-npm "0.6.1"]
-            [lein-doo "0.1.6"]
-            [org.bodil/lein-noderepl "0.1.11"]]
+            [lein-doo "0.1.6"]]
 
   :npm {:dependencies [["source-map-support" "0.4.0"]]
         :package {:bin {"denvr" "build/main.js"}
@@ -23,13 +30,7 @@
 
   :aliases {"build" ["cljsbuild" "once" "main"]
             "test" ["doo" "node" "test-node" "once"]
-            "test-auto" ["doo" "node" "test-node" "auto"]
-            "snapshot" ["do"
-                        "vcs" "assert-committed,"
-                        "clean,"
-                        "build,"
-                        "vcs" "commit,"
-                        "vcs" "tag"]}
+            "test-auto" ["doo" "node" "test-node" "auto"]}
 
   :release-tasks [["vcs" "assert-committed"]
                   ["clean"]
@@ -44,7 +45,6 @@
                   ["vcs" "commit"]
                   ["vcs" "push"]]
 
-  :profiles {:dev {:dependencies [[lein-doo "0.1.6"]]}}
 
   :cljsbuild {:builds [{:id "main"
                         :source-paths ["src"]
