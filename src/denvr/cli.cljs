@@ -2,12 +2,13 @@
   (:require [cljs.nodejs :as nodejs]
             [cljs.tools.cli :refer [parse-opts]]
             [clojure.string :as str]
-            [denvr.core :refer [run]]))
+            [denvr.core :refer [run]]
+            [denvr.util :refer-macros [env]]))
 
 (def top-level-spec
   [["-c" "--configdir DIR" "Configuration Directory"
     :id :configdir
-    :default "~/.denvr"]
+    :default (str (env "HOME") "/.denvr")]
    ["-v" nil "Verbosity level"
     :id :verbosity
     :default 0
@@ -106,6 +107,6 @@
     (if error
       (println error)
       (try
-        (run args)
+        (run argm)
         (catch js/Error e
           (println e))))))

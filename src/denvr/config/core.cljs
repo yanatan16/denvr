@@ -8,13 +8,16 @@
 (def ^:private path (nodejs/require "path"))
 
 (defn- file-readable? [file]
-  (.accessSync fs (.-R_OK fs)))
+  (try (.accessSync fs file (.-R_OK fs))
+       true
+       (catch js/Error e
+         false)))
 
 (defn- read-file [file]
   (.readFileSync fs file "utf8"))
 
 (defn- path-join [& paths]
-  (.apply (.-join path) (clj->js paths)))
+  (apply (.-join path) paths))
 
 
 (defn read-env
@@ -24,6 +27,7 @@
   (-> (path-join dir (name env) "env.edn")
       (#(if-not (file-readable? %)
           (throw (ex-info "Environment not readable"
-                          {:env env :configdir dir}))))
+                          {:env env :configdir dir}))
+          %))
       read-file
       edn/read-string))

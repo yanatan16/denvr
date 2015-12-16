@@ -1,5 +1,6 @@
 (ns denvr.core
-  (:require [denvr.config.core :as cfg]))
+  (:require [denvr.config.core :as cfg]
+            [denvr.docker :as docker]))
 
 (defmulti run
   "Run a subcommand.
@@ -8,6 +9,7 @@
 
 
 (defmethod run :up
-  [{[env & _] :arguments
+  [{[envname & _] :arguments
     {dir :configdir} :top-options}]
-  (throw (ex-info "Test" {:show-help true})))
+  (let [env (cfg/read-env dir envname)]
+    (docker/start-env env)))

@@ -10,25 +10,25 @@
                  [org.clojure/clojurescript "1.7.170" :classifier "aot"]
                  [org.clojure/core.async "0.2.374"]
                  [org.clojure/tools.cli "0.3.3"]
-                 [org.clojure/algo.monads "0.1.5"]
 
-                 [io.nervous/cljs-nodejs-externs "0.2.0"]
+                 ;; [io.nervous/cljs-nodejs-externs "0.2.0"]
 
                  [prismatic/schema "1.0.4"]]
 
 
-  :profiles {:dev {:dependencies [[lein-doo "0.1.6"]
-                                  [org.clojure/test.check "0.9.0"]]}}
+  :profiles {:dev {:dependencies [[lein-doo "0.1.6"]]}}
 
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-npm "0.6.1"]
             [lein-doo "0.1.6"]]
 
-  :npm {:dependencies [["source-map-support" "0.4.0"]]
+  :npm {:dependencies [["source-map-support" "0.4.0"]
+                       ["dockerode" "2.2.7"]]
         :package {:bin {"denvr" "build/main.js"}
                   :private false}}
 
   :aliases {"build" ["cljsbuild" "once" "main"]
+            "build-auto" ["cljsbuild" "auto" "main"]
             "test" ["doo" "node" "test-node" "once"]
             "test-auto" ["doo" "node" "test-node" "auto"]}
 
@@ -51,7 +51,7 @@
                         :compiler {:main denvr.main
                                    :output-to "build/main.js"
                                    :output-dir "build/js"
-                                   :optimizations :advanced
+                                   :optimizations :none
                                    :target :nodejs
                                    :source-map "build/main.js.map"}}
                        {:id "test-node"
