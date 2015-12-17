@@ -11,8 +11,7 @@
                  [org.clojure/core.async "0.2.374"]
                  [org.clojure/tools.cli "0.3.3"]
 
-                 ;; [io.nervous/cljs-nodejs-externs "0.2.0"]
-
+                 [net.clojure/monads "1.0.2"]
                  [prismatic/schema "1.0.4"]]
 
 
