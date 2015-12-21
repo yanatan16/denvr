@@ -1,7 +1,8 @@
 (ns denvr.cli-test
   (:require [cljs.test :refer-macros [deftest testing is]]
             [denvr.cli :refer [parse-args]]
-            [denvr.util :as u :refer-macros [env]])
+            [denvr.util :refer-macros [env]]
+            [cats.monad.either])
   (:require-macros [denvr.test-macros :refer [is-parse-error is-parsed]]))
 
 (def default-top-options {:configdir (str (env "HOME") "/.denvr") :verbosity 0})
@@ -10,7 +11,7 @@
    :options {}
    :arguments []
    :top-options default-top-options
-   :top-summary (:top-summary (u/failure-value (parse-args "denvr" ["-h"])))
+   :top-summary (:top-summary @(parse-args "denvr" ["-h"]))
    :summary "  -h, --help"
    :script "denvr"})
 (defn status-parsed []

@@ -2,10 +2,10 @@
   (:require [cljs.nodejs :as nodejs]
             [cljs.tools.cli :refer [parse-opts]]
             [clojure.string :as str]
-            [monads.core :as m]
+            [cats.core :as m :include-macros true]
+            [cats.monad.either :refer [left right branch]]
             [denvr.core :refer [run]]
-            [denvr.util :as u :refer-macros [env]])
-  (:require-macros [monads.macros :as mm]))
+            [denvr.util :as u :refer-macros [env]]))
 
 (def top-level-spec
   [["-c" "--configdir DIR" "Configuration Directory"
@@ -81,42 +81,39 @@
 
 ;; Either monad parsing of subcmd args
 (defn parse-subcmd-args [argm subcmd raw-args]
-  (mm/do
-    u/either
+  (m/mlet
     [:let [[_ argspec optspec] (subcmd-cli-options-map subcmd)
            {:keys [options summary errors arguments]}
            (parse-opts raw-args optspec)]
-     argm (u/success (merge argm {:options options :summary summary
-                                  :arguments arguments :subcmd (keyword subcmd)}))
-     _ (u/fail-if errors (assoc argm :error (str/join "\n" errors)))
-     _ (u/fail-if (:help options) argm)
+     argm (right (merge argm {:options options :summary summary
+                              :arguments arguments :subcmd (keyword subcmd)}))
+     _ (if errors (left (assoc argm :error (str/join "\n" errors))) (right))
+     _ (if (:help options) (left argm) (right))
      :let [argerr (check-subcmd-args argspec arguments)]
-     _ (u/fail-if argerr (assoc argm :error argerr))]
-    argm))
+     _ (if argerr (left (assoc argm :error argerr)) (right))]
+    (m/return argm)))
 
 ;; Either monad parsing of args
 (defn parse-args [script raw-args]
-  (mm/do
-    u/either
+  (m/mlet
     [:let [{:keys [options summary errors] [subcmd & subargs] :arguments}
            (parse-opts raw-args top-level-spec :in-order true)]
-     argm (u/success {:script script :top-options options
-                      :top-summary summary})
-     _ (u/fail-if errors (assoc argm :error (str/join "\n" errors)))
-     _ (u/fail-if (:help options) argm)
-     _ (u/fail-if (nil? subcmd) (assoc argm :error "No subcommand specified."))
+     argm (right {:script script :top-options options
+                  :top-summary summary})
+     _ (if errors (left (assoc argm :error (str/join "\n" errors))) (right))
+     _ (if (:help options) (left argm) (right))
+     _ (if (nil? subcmd) (left (assoc argm :error "No subcommand specified.")) (right))
      :let [subcmd-opts (subcmd-cli-options-map subcmd)]
-     _ (u/fail-if (nil? subcmd-opts)
-                  (assoc argm :error (str "Subcommand " subcmd " not recognized")))
+     _ (if (nil? subcmd-opts)
+         (left (assoc argm :error (str "Subcommand " subcmd " not recognized")))
+         (right))
      argm- (parse-subcmd-args argm subcmd subargs)]
-    argm-))
+    (m/return argm-)))
 
 
 (defn cli [script args]
-  (let [either (parse-args script args)]
-    (if (u/failure-value either)
-      (println (help (u/failure-value either)))
-      (try
-        (run (u/success-value either))
-        (catch js/Error e
-          (println e))))))
+  (let [either-argm (parse-args script args)]
+    (branch either-argm
+            #(println (help %))
+            #(try (run %)
+                  (catch js/Error e (println e))))))

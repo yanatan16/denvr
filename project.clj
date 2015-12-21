@@ -11,7 +11,7 @@
                  [org.clojure/core.async "0.2.374"]
                  [org.clojure/tools.cli "0.3.3"]
 
-                 [net.clojure/monads "1.0.2"]
+                 [funcool/cats "1.2.1"]
                  [prismatic/schema "1.0.4"]]
 
 
