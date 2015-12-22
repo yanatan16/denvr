@@ -2,7 +2,9 @@
 
 (defmacro node->async [& forms]
   `(let [c# (cljs.core.async/chan)]
-     (~@forms #(if %1 (throw %1) (cljs.core.async/onto-chan c# [%2])))
+     (~@forms #(cljs.core.async/onto-chan
+                c#
+                [(if %1 (throw %1) (cljs.core/js->clj %2))]))
      c#))
 
 (defmacro env [k]

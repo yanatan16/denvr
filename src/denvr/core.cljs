@@ -8,8 +8,20 @@
   :subcmd)
 
 
-(defmethod run :up
+(defmethod run :start
   [{[envname & _] :arguments
     {dir :configdir} :top-options}]
   (let [env (cfg/read-env dir envname)]
-    (docker/start-env env)))
+    (docker/start-env envname env)))
+
+(defmethod run :stop
+  [{[envname & _] :arguments
+    {dir :configdir} :top-options}]
+  (let [env (cfg/read-env dir envname)]
+    (docker/stop-env envname env)))
+
+(defmethod run :status
+  [{[envname & _] :arguments
+    {dir :configdir} :top-options}]
+  (let [env (cfg/read-env dir envname)]
+    (docker/env-status envname env)))

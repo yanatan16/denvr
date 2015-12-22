@@ -18,10 +18,10 @@
    ["-h" "--help"]])
 
 (def subcmd-cli-options
-  [["up" "Bring an environment up"
+  [["start" "Start an environment up"
     [:env]
     [["-h" "--help"]]]
-   ["down" "Shut an environment down"
+   ["stop" "Stop an environment's containers"
     [:env]
     [["-h" "--help"]]]
    ["status" "Query the status of environments"
@@ -116,4 +116,4 @@
     (branch either-argm
             #(println (help %))
             #(try (run %)
-                  (catch js/Error e (println e))))))
+                  (catch js/Error e (println "ERROR" e))))))
