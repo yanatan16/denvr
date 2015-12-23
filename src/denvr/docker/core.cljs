@@ -9,11 +9,19 @@
   ([] {:filters "{\"label\": [\"denvr\"]}"})
   ([name] {:filters (str "{\"label\": [\"denvr='" name "'\"]}")}))
 
+(defn- container-spec->docker
+  [env-name {:keys [ports] :as spec}]
+  (-> spec
+      (select-keys [:image])
+      (assoc :exposed-ports (into {} (map (fn [[n p]] [(str n "/" p) {}]) ports)))
+      (assoc :labels {"denvr" env-name})))
+
+
 (defn start-env [name {:keys [containers]} host]
   (with-docker [docker host]
     (m/mlet
      [spec (a/to-chan containers)
-      :let [spec (assoc spec :labels {"denvr" name})]
+      :let [spec (container-spec->docker name spec)]
       container (api/docker-create-container docker spec)
       result (api/container-start container)
       info (api/container-inspect container)]

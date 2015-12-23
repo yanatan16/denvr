@@ -24,7 +24,9 @@
            (let [res (<! (a/into #{} (docker/start-env name env host)))]
              (is (= 1 (count res)))
              (is (some? (get (first res) "Id")))
+             (is (= "nginx:1.9.8" (get (first res) "Image")))
              (is (= name (get-in (first res) ["Config" "Labels" "denvr"])))
+             (is (= 80 (get-in (first res) ["Ports" 0 "PrivatePort"])))
              (reset! id' (get (first res) "Id"))))
          (testing "env status"
            (let [res (<! (a/into #{} (docker/env-status name env host)))]
