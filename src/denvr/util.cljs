@@ -4,14 +4,14 @@
             [clojure.string :as string]
             [clojure.walk :refer [postwalk]]))
 
-(defn camelize-kw [s]
-  (-> (name s)
-      string/capitalize
-      (string/replace #"-([a-z])" #(string/capitalize (second %)))))
+(defn camelize-kw [k & {:keys [capitalize?]}]
+  (cond-> (name k)
+    capitalize? string/capitalize
+    true (string/replace #"-([a-z])" #(string/capitalize (second %)))))
 
 (defn camelize-keys
   "Recursively transforms all map keys that are keywords to CamelCase"
-  [m]
-  (let [f (fn [[k v]] (if (keyword? k) [(camelize-kw k) v] [k v]))]
+  [m & opts]
+  (let [f (fn [[k v]] (if (keyword? k) [(apply camelize-kw k opts) v] [k v]))]
     ;; only apply to maps
     (postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))

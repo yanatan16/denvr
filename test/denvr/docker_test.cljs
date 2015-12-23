@@ -2,19 +2,21 @@
   (:require [cljs.test :refer-macros [deftest is testing async]]
             [cljs.core.async :refer [<!] :as a]
             [denvr.util :refer-macros [env]]
-            [denvr.docker :as docker]
+            [denvr.docker.core :as docker]
             [denvr.cli :as cli]
             [denvr.config.core :as cfg])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def configdir (str (env "HOME") "/.denvr"))
 (def host (cfg/read-host configdir))
-
+(def env
+  {:containers [{:id "nginx"
+                 :image "nginx:1.9.8"
+                 :ports [[80 :tcp]]}]})
 (deftest start-status-stop-test
   (async
    done
    (go (let [name (str (gensym "test"))
-             env {:containers [{:id "nginx" :image "nginx:1.9.8"}]}
              id' (atom nil)]
          (testing "validate env"
            (is (= env (cfg/check-env env))))
