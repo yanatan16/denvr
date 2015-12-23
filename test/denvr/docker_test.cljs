@@ -13,8 +13,8 @@
 (deftest start-status-stop-test
   (async
    done
-   (go (let [name (gensym "test")
-             env {:containers [{:id "nginx" :image "nginx"}]}
+   (go (let [name (str (gensym "test"))
+             env {:containers [{:id "nginx" :image "nginx:1.9.8"}]}
              id' (atom nil)]
          (testing "validate env"
            (is (= env (cfg/check-env env))))
