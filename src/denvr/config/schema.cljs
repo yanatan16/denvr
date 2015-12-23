@@ -14,3 +14,15 @@
 
 (defschema Environment
   {:containers [Container]})
+
+;; Hosts config
+
+(defschema DockerHostConfig
+  {(s/optional-key :host) s/Str
+   (s/optional-key :port) s/Num
+   (s/optional-key :ca) s/Str
+   (s/optional-key :cert) s/Str
+   (s/optional-key :key) s/Str})
+
+(defschema HostConfig
+  {:docker DockerHostConfig})

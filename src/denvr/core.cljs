@@ -1,6 +1,15 @@
 (ns denvr.core
-  (:require [denvr.config.core :as cfg]
-            [denvr.docker :as docker]))
+  (:require [denvr.config.core]
+            [denvr.docker :as docker]
+            [cljs.core.async :refer [<!]])
+  (:require-macros [denvr.core :refer [defenvmethod]]
+                   [cljs.core.async.macros :refer [go-loop]]))
+
+(defn print-results [c]
+  (println "Results:\n")
+  (go-loop [v (<! c)]
+    (when v (println v)
+            (recur (<! c)))))
 
 (defmulti run
   "Run a subcommand.
@@ -8,20 +17,6 @@
   :subcmd)
 
 
-(defmethod run :start
-  [{[envname & _] :arguments
-    {dir :configdir} :top-options}]
-  (let [env (cfg/read-env dir envname)]
-    (docker/start-env envname env)))
-
-(defmethod run :stop
-  [{[envname & _] :arguments
-    {dir :configdir} :top-options}]
-  (let [env (cfg/read-env dir envname)]
-    (docker/stop-env envname env)))
-
-(defmethod run :status
-  [{[envname & _] :arguments
-    {dir :configdir} :top-options}]
-  (let [env (cfg/read-env dir envname)]
-    (docker/env-status envname env)))
+(defenvmethod :start docker/start-env)
+(defenvmethod :stop docker/stop-env)
+(defenvmethod :status docker/env-status)

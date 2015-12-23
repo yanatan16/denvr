@@ -1,5 +1,8 @@
 # denvr
 
+[![Build Status](https://img.shields.io/travis/yanatan16/denvr.svg)](https://travis-ci.org/yanatan16/denvr)
+[![NPM Version](https://img.shields.io/npm/v/denvr.svg)](https://www.npmjs.com/package/denvr)
+
 Development Environments Reimagined.
 
 A CLI application for managing microservice, containerized development environments.
@@ -23,8 +26,8 @@ Top-level options:
   -h, --help
 Available Subcommands:
   version: Report version of denvr
-  up: Bring an environment up
-  down: Shut an environment down
+  start: Start an environment up
+  stop: Stop an environment
   status: Query the status of environments
   sync: Start code-sync of a single container
   unsync: Stop code-sync of a single container
@@ -57,13 +60,13 @@ node build/main.js [top-options] subcmd [subcmd-options]
 To test once, just use:
 
 ```sh
-lein test      # aka: lein doo node test-node once
+lein test      # aka: lein cljsbuild once test
 ```
 
 To test and watch for changes, use:
 
 ```sh
-lein test-auto # aka: lein doo node test-node auto
+lein test-auto # aka: lein cljsbuild auto test
 ```
 
 ### License

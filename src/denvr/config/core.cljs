@@ -2,7 +2,7 @@
   (:require [cljs.nodejs :as nodejs]
             [cljs.reader :as edn]
             [schema.core :as s]
-            [denvr.config.schema :as schema]))
+            [denvr.config.schema :refer [HostConfig Environment]]))
 
 (def ^:private fs (nodejs/require "fs"))
 (def ^:private path (nodejs/require "path"))
@@ -19,6 +19,25 @@
 (defn- path-join [& paths]
   (apply (.-join path) paths))
 
+(defn- check-schema [cfg schema str {:as ex-data}]
+  (if-let [errs (s/check schema cfg)]
+    (throw (ex-info str (assoc ex-data :errors errs)))
+    cfg))
+
+(defn check-host [host & [{:as ex-data}]]
+  (check-schema host HostConfig "Host configuration is invalid" ex-data))
+
+(defn check-env [env & [{:as ex-data}]]
+  (check-schema env Environment "Environment configuration is invalid" ex-data))
+
+(defn read-host
+  "Read host configuration from a top level config directory"
+  [dir]
+  (some-> (path-join dir "host.edn")
+          (#(if (file-readable? %) %))
+          read-file
+          edn/read-string
+          (check-host {:configdir dir})))
 
 (defn read-env
   "Read environment configuration from a top level directory
@@ -30,4 +49,5 @@
                           {:env env :configdir dir}))
           %))
       read-file
-      edn/read-string))
+      edn/read-string
+      (check-env {:env env :configdir dir})))

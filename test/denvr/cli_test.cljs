@@ -16,8 +16,8 @@
    :script "denvr"})
 (defn status-parsed []
   (assoc (empty-parsed) :subcmd :status))
-(defn up-parsed []
-  (assoc (empty-parsed) :subcmd :up :arguments ["env"]))
+(defn start-parsed []
+  (assoc (empty-parsed) :subcmd :start :arguments ["env"]))
 
 (deftest top-level-parse-args-test
   (testing "top level parse-args help"
@@ -43,6 +43,6 @@
                ["-vvv" "status"]))
   (testing "status subcommand"
     (is-parsed (= (status-parsed)) ["status"]))
-  (testing "up subcommand"
-    (is-parse-error #"Missing required argument env" ["up"])
-    (is-parsed (= (up-parsed)) ["up" "env"])))
+  (testing "start subcommand"
+    (is-parse-error #"Missing required argument env" ["start"])
+    (is-parsed (= (start-parsed)) ["start" "env"])))
