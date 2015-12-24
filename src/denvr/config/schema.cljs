@@ -24,12 +24,10 @@
 ;; Hosts config
 
 (defschema DockerHostConfig
-  {(s/optional-key :socket-path) s/Str
-   (s/optional-key :host) s/Str
-   (s/optional-key :port) s/Num
-   (s/optional-key :ca) s/Str
-   (s/optional-key :cert) s/Str
-   (s/optional-key :key) s/Str})
+  {(s/optional-key :host) s/Str
+   (s/optional-key :cert-path) s/Str
+   (s/optional-key :tls-verify) s/Bool
+   (s/optional-key :http-timeout) s/Int})
 
 (defschema HostConfig
   {:docker DockerHostConfig})

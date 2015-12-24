@@ -7,19 +7,18 @@
   :clean-targets ["build" :target-path]
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.170" :classifier "aot"]
+                 [org.clojure/clojurescript "1.7.170"]
                  [org.clojure/core.async "0.2.374"]
                  [org.clojure/tools.cli "0.3.3"]
 
+                 [cljsjs/js-yaml "3.3.1-0"]
                  [org.clojars.yanatan16/cats "1.3.1"]
                  [prismatic/schema "1.0.4"]]
 
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-npm "0.6.1"]]
 
-  :npm {:dependencies [["source-map-support" "0.4.0"]
-                       ["dockerode" "2.2.7"]
-                       ["split-ca" "1.0.0"]]
+  :npm {:dependencies [["source-map-support" "0.4.0"]]
         :package {:bin {"denvr" "build/main.js"}
                   :private false}}
 
@@ -35,12 +34,6 @@
                    "leiningen.release/bump-version"]
                   ["vcs" "commit"]
                   ["vcs" "push"]]
-
-  :aliases {"build" ["cljsbuild" "once" "main"]
-            "build-auto" ["cljsbuild" "auto" "main"]
-            "test" ["cljsbuild" "once" "test"]
-            "test-auto" ["cljsbuild" "auto" "test"]}
-
 
   :cljsbuild {:test-commands {"test" ["node" "target/test-node.js"]}
               :builds [{:id "main"

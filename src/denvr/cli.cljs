@@ -1,6 +1,7 @@
 (ns denvr.cli
   (:require [cljs.nodejs :as nodejs]
             [cljs.tools.cli :refer [parse-opts]]
+            [cljs.pprint :refer [pprint]]
             [clojure.string :as str]
             [cats.core :as m :include-macros true]
             [cats.monad.either :refer [left right branch]]
@@ -116,4 +117,9 @@
     (branch either-argm
             #(println (help %))
             #(try (run %)
+                  (catch ExceptionInfo e
+                    (let [msg (.-message e)
+                          data (ex-data e)]
+                      (println msg)
+                      (println (pprint data))))
                   (catch js/Error e (println "ERROR" e))))))

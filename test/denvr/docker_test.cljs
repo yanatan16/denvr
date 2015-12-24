@@ -2,7 +2,7 @@
   (:require [cljs.test :refer-macros [deftest is testing async]]
             [cljs.core.async :refer [<!] :as a]
             [denvr.util :refer-macros [env]]
-            [denvr.docker.core :as docker]
+            [denvr.docker :as docker]
             [denvr.cli :as cli]
             [denvr.config.core :as cfg])
   (:require-macros [cljs.core.async.macros :refer [go]]))
