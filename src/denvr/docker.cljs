@@ -2,7 +2,9 @@
   (:require [cljs.core.async :as a :refer [<!]]
             [cljs.nodejs :as nodejs]
             [cljsjs.js-yaml]
-            [cats.monad.either :as e])
+            [clojure.string :as str]
+            [cats.core :as m :include-macros true]
+            [cats.labs.channel])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def ^:private spawn (.-spawn (nodejs/require "child_process")))
@@ -23,33 +25,34 @@
        (.safeDump js/jsyaml)))
 
 (defn- shell [cmd args opts & [stdin]]
-  (let [c (a/chan)
-        proc (spawn cmd (clj->js args) (clj->js opts))
-        stderr (atom "")]
+  (let [stdout (a/chan) stderr (a/chan) exit (a/chan)
+        proc (spawn cmd (clj->js args) (clj->js opts))]
     (.. proc -stdout (setEncoding "utf8"))
-    (.. proc -stdout (on "data" #(go (a/>! c (e/left %)))))
+    (.. proc -stdout (on "data" #(go (a/>! stdout %))))
     (.. proc -stderr (setEncoding "utf8"))
-    (.. proc -stderr (on "data" #(swap! stderr str "\n" %)))
+    (.. proc -stderr (on "data" #(go (a/>! stderr %))))
     (.on proc "close"
-         #(do (if %
-                (go (->> {:cmd cmd :args args
-                          :opts opts :stdin stdin
-                          :code % :stderr @stderr}
-                         (ex-info "Error running command")
-                         e/right
-                         (a/>! c))))
-              (a/close! c)))
+         #(do (a/close! stdout)
+              (a/close! stderr)
+              (a/onto-chan exit [%])))
     (if stdin (.. proc -stdin (end stdin "utf8")))
-    c))
+    [stdout stderr exit]))
+
+
+(defn- drop-stty-err [[stdout stderr exit]]
+  (let [stderr- (m/fmap #(str/replace % #"stty: stdin isn't a terminal\n?" "")
+                        stderr)]
+    [stdout stderr- exit]))
 
 (defn- compose
   "run docker-compose"
   [name env host subcmd]
-  (shell "docker-compose"
-         (into ["-p" name "-f" "-"] subcmd)
-         {:stdio "pipe"
-          :env (host-env host)}
-         (env->compose env)))
+  (-> (shell "docker-compose"
+             (into ["-p" name "-f" "-"] subcmd)
+             {:stdio "pipe"
+              :env (host-env host)}
+             (env->compose env))
+      drop-stty-err))
 
 
 (defn start-env [name env host]
