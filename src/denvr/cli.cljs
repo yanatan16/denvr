@@ -122,4 +122,4 @@
                           data (ex-data e)]
                       (println msg)
                       (println (pprint data))))
-                  (catch js/Error e (println "ERROR" e))))))
+                  (catch js/Error e (println "ERROR" (.stack e)))))))
