@@ -22,6 +22,8 @@
         :package {:bin {"denvr" "build/main.js"}
                   :private false}}
 
+  :profiles {:dev {:npm {:dependencies [["request" "2.67.0"]]}}}
+
   :release-tasks [["vcs" "assert-committed"]
                   ["clean"]
                   ["build"]

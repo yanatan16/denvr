@@ -3,7 +3,7 @@
             [denvr.cli :refer [parse-args]]
             [denvr.util :refer-macros [env]]
             [cats.monad.either])
-  (:require-macros [denvr.test-macros :refer [is-parse-error is-parsed]]))
+  (:require-macros [denvr.cli-test :refer [is-parse-error is-parsed]]))
 
 (def default-top-options {:configdir (str (env "HOME") "/.denvr") :verbosity 0})
 (defn empty-parsed []

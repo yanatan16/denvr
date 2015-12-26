@@ -1,4 +1,4 @@
-(ns denvr.test-macros)
+(ns denvr.cli-test)
 
 (defmacro is-parse-error [re args]
   `(let [args# ~args
