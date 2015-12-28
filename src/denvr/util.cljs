@@ -9,6 +9,7 @@
 
 (def ^:private js-spawn (.-spawn (nodejs/require "child_process")))
 (def ^:private js-http (nodejs/require "http"))
+(def ^:private js-path (nodejs/require "path"))
 
 (defn camelize-kw [k & {:keys [capitalize?]}]
   (cond-> (name k)
@@ -21,6 +22,9 @@
   (let [f (fn [[k v]] (if (keyword? k) [(apply camelize-kw k opts) v] [k v]))]
     ;; only apply to maps
     (postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
+
+(defn path-join [& ds]
+  (apply (.-join js-path) ds))
 
 (defn print-results [stdout stderr exit]
   (let [out (m/mappend (m/fmap (fn [s] [:out s]) stdout)
