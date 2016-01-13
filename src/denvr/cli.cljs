@@ -45,7 +45,9 @@
     [["-h" "--help"]]]
    ["clone" "Clone an environment from a remote repository"
     [:url]
-    [["-h" "--help"]]]])
+    [["-h" "--help"]]]
+   ["compose-file" "Debugging: Output compose file sent to docker-compose"
+    [:env]]])
 
 (defn usage [script]
   (str "Usage: " script " [top-options] subcmd [subcmd-options|subcmd-args]"))
@@ -83,33 +85,33 @@
 ;; Either monad parsing of subcmd args
 (defn parse-subcmd-args [argm subcmd raw-args]
   (m/mlet
-    [:let [[_ argspec optspec] (subcmd-cli-options-map subcmd)
-           {:keys [options summary errors arguments]}
-           (parse-opts raw-args optspec)]
-     argm (right (merge argm {:options options :summary summary
-                              :arguments arguments :subcmd (keyword subcmd)}))
-     _ (if errors (left (assoc argm :error (str/join "\n" errors))) (right))
-     _ (if (:help options) (left argm) (right))
-     :let [argerr (check-subcmd-args argspec arguments)]
-     _ (if argerr (left (assoc argm :error argerr)) (right))]
-    (m/return argm)))
+   [:let [[_ argspec optspec] (subcmd-cli-options-map subcmd)
+          {:keys [options summary errors arguments]}
+          (parse-opts raw-args optspec)]
+    argm (right (merge argm {:options options :summary summary
+                             :arguments arguments :subcmd (keyword subcmd)}))
+    _ (if errors (left (assoc argm :error (str/join "\n" errors))) (right))
+    _ (if (:help options) (left argm) (right))
+    :let [argerr (check-subcmd-args argspec arguments)]
+    _ (if argerr (left (assoc argm :error argerr)) (right))]
+   (m/return argm)))
 
 ;; Either monad parsing of args
 (defn parse-args [script raw-args]
   (m/mlet
-    [:let [{:keys [options summary errors] [subcmd & subargs] :arguments}
-           (parse-opts raw-args top-level-spec :in-order true)]
-     argm (right {:script script :top-options options
-                  :top-summary summary})
-     _ (if errors (left (assoc argm :error (str/join "\n" errors))) (right))
-     _ (if (:help options) (left argm) (right))
-     _ (if (nil? subcmd) (left (assoc argm :error "No subcommand specified.")) (right))
-     :let [subcmd-opts (subcmd-cli-options-map subcmd)]
-     _ (if (nil? subcmd-opts)
-         (left (assoc argm :error (str "Subcommand " subcmd " not recognized")))
-         (right))
-     argm- (parse-subcmd-args argm subcmd subargs)]
-    (m/return argm-)))
+   [:let [{:keys [options summary errors] [subcmd & subargs] :arguments}
+          (parse-opts raw-args top-level-spec :in-order true)]
+    argm (right {:script script :top-options options
+                 :top-summary summary})
+    _ (if errors (left (assoc argm :error (str/join "\n" errors))) (right))
+    _ (if (:help options) (left argm) (right))
+    _ (if (nil? subcmd) (left (assoc argm :error "No subcommand specified.")) (right))
+    :let [subcmd-opts (subcmd-cli-options-map subcmd)]
+    _ (if (nil? subcmd-opts)
+        (left (assoc argm :error (str "Subcommand " subcmd " not recognized")))
+        (right))
+    argm- (parse-subcmd-args argm subcmd subargs)]
+   (m/return argm-)))
 
 
 (defn cli [script args]
@@ -119,7 +121,9 @@
             #(try (run %)
                   (catch ExceptionInfo e
                     (let [msg (.-message e)
+                          stack (.-stack e)
                           data (ex-data e)]
-                      (println msg)
-                      (println (pprint data))))
-                  (catch js/Error e (println "ERROR" (.stack e)))))))
+                      (println "ERROR: " msg)
+                      (println (pprint data))
+                      (println stack)))
+                  (catch js/Error e (println "ERROR" (.-stack e)))))))

@@ -16,15 +16,25 @@
     (if  http-timeout (set! (.-DOCKER_HTTP_TIMEOUT env) (str http-timeout)))
     env))
 
-(defn container->compose-container [dir {:keys [build image] :as c}]
-  (cond-> c
-    (and dir build) (assoc :build (util/path-join dir build))))
+(defn denvr-cfg
+  [{:keys [type image sync tag version repo build dockerfile sync-dir]
+    :as denvr}
+   id dir]
+  (if (and (= type :variable) (not dir))
+    (throw (ex-info "No host directory for variable container"
+                    {:container-id id :denvr-config denvr})))
+  (cond
+    (= type :stable) {:image image}
+    sync {:build (util/path-join dir (or build "."))
+          :environment {"SYNC" "1"}
+          :volumes [(str (util/path-join dir (or build ".")) ":" sync-dir)]}
+    :else {:image (str repo tag ":" version)}))
 
 (defn env->compose-xf [dirs]
-  (comp (map #(container->compose-container (get dirs (:id %)) %))
-        (map #(do [(:id %) (dissoc % :id)]))))
+  (map (fn [{:keys [id compose denvr]}]
+         [id (merge compose (denvr-cfg denvr id (get dirs id)))])))
 
-(defn- env->compose [name {:keys [containers]} {dirs-cfg :dirs}]
+(defn env->compose [name {:keys [containers]} {dirs-cfg :dirs}]
   (->yaml (into {} (env->compose-xf (get dirs-cfg name)) containers)))
 
 (defn- compose

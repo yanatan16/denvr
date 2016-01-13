@@ -4,7 +4,8 @@
             [clojure.string :as string]
             [clojure.walk :refer [postwalk]]
             [cats.core :as m :include-macros true]
-            [cats.labs.channel])
+            [cats.context :as ctx :include-macros true]
+            [cats.labs.channel :as channel])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (def ^:private js-spawn (.-spawn (nodejs/require "child_process")))
@@ -26,17 +27,20 @@
 (defn path-join [& ds]
   (apply (.-join js-path) ds))
 
-(defn print-results [stdout stderr exit]
-  (let [out (m/mappend (m/fmap (fn [s] [:out s]) stdout)
-                       (m/fmap (fn [s] [:err s]) stderr))]
-    (go-loop []
-      (let [[l s :as v] (a/<! out)]
-        (if (nil? v)
-          (.exit nodejs/process (a/<! exit))
-          (do (if (= l :out)
-                (println s)
-                (.error js/console s))
-              (recur)))))))
+(defn print-results [name [stdout stderr exit]]
+  (ctx/with-context
+    channel/context
+    (let [out (m/mappend (m/fmap (fn [s] [:out s]) stdout)
+                         (m/fmap (fn [s] [:err s]) stderr))]
+      (println (str name ":"))
+      (go-loop []
+        (let [[l s :as v] (a/<! out)]
+          (if (nil? v)
+            (.exit nodejs/process (a/<! exit))
+            (do (if (= l :out)
+                  (println s)
+                  (.error js/console s))
+                (recur))))))))
 
 (defn spawn [cmd args opts & [stdin]]
   (let [stdout (a/chan) stderr (a/chan) exit (a/chan)
