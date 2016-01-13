@@ -124,6 +124,6 @@
                           stack (.-stack e)
                           data (ex-data e)]
                       (println "ERROR: " msg)
-                      (println (pprint data))
+                      (when-not (empty? data) (pprint data))
                       (println stack)))
                   (catch js/Error e (println "ERROR" (.-stack e)))))))
