@@ -2,7 +2,7 @@
   (:require [cljs.nodejs :as nodejs]
             [cljs.pprint :refer [pprint]]
             [cljs.core.async :as a]
-            [denvr.config.core]
+            [denvr.config.core :as cfg]
             [denvr.util :as util]
             [denvr.docker :as docker]
             [cats.core :as m :include-macros true]
@@ -16,26 +16,33 @@
   Called with a map of keys :top-options, :options, :arguments"
   :subcmd)
 
+(defn load-host [{{dir :configdir} :top-options :as args}]
+  (assoc args :top-dir dir :host-cfg (cfg/read-host dir)))
 
-(defenvmethod :start [host envs]
-  (run! (fn [[name env]]
-          (util/print-results (str "Starting " name)
-                              (docker/start-env name env host)))
-        envs))
+(defn load-env [{[env-name & _] :arguments
+                 dir :top-dir :as args}]
+  (cond-> args
+    env-name (assoc :env-name env-name
+                    :env-cfg (cfg/read-env dir env-name))))
 
-(defenvmethod :stop [host envs]
-  (run! (fn [[name env]]
-          (util/print-results (str "Stopping " name)
-                              (docker/stop-env name env host)))
-        envs))
+(defn load-all-envs [{dir :top-dir :as args}]
+  (assoc args :envs-cfg (cfg/read-all-envs dir)))
 
-(defenvmethod :status [host envs]
-  (run! (fn [[name env]]
-          (util/print-results name
-                              (docker/env-status name env host)))
-        envs))
+(defenvmethod :start [{:keys [env-cfg env-name host-cfg]}]
+  (util/print-results (str "Starting " env-name)
+                      (docker/start-env env-name env-cfg host-cfg)))
 
-(defenvmethod :compose-file [host envs]
-  (run! (fn [[name env]]
-          (println (docker/env->compose name env host)))
-        envs))
+(defenvmethod :stop [{:keys [env-cfg env-name host-cfg]}]
+  (util/print-results (str "Stopping " env-name)
+                      (docker/stop-env env-name env-cfg host-cfg)))
+
+(defenvmethod :compose-file [{:keys [env-cfg env-name host-cfg]}]
+  (println (docker/env->compose env-name env-cfg host-cfg)))
+
+
+(defmethod run :status [args]
+  (-> args load-host load-env
+      (#(if (:env-cfg %) % (load-all-envs %)))
+      ((fn [{:keys [env-cfg env-name host-cfg]}]
+         (util/print-results (str env-name " Status")
+                             (docker/env-status env-name env-cfg host-cfg))))))

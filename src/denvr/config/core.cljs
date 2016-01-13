@@ -50,8 +50,7 @@
           %))
       read-file
       edn/read-string
-      (check-env {:env env :configdir dir})
-      (#(hash-map env %))))
+      (check-env {:env env :configdir dir})))
 
 (defn read-all-envs
   "Read all available environment configurations from a top level directory"
@@ -59,4 +58,4 @@
   (apply merge
          (for [env (.readdirSync fs dir)
                :when (not (re-find #"\." env))]
-           (read-env dir env))))
+           {env (read-env dir env)})))
